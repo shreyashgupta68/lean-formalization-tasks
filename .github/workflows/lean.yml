@@ -1,0 +1,25 @@
+name: Lean build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build tasks and solutions against Mathlib
+        uses: leanprover/lean-action@v1
+        with:
+          use-mathlib-cache: true
+
+      - name: Solutions must not contain sorry
+        run: |
+          if grep -rnw --include='*.lean' 'sorry' LeanTasks/Solutions; then
+            echo "::error::Found sorry in LeanTasks/Solutions"
+            exit 1
+          fi
+          echo "No sorry in LeanTasks/Solutions"
